@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Крестики-нолики</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            margin-bottom: 20px;
+        }
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 5px;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            background-color: #fff;
+            border: 2px solid #333;
+            cursor: pointer;
+        }
+        .cell:hover {
+            background-color: #f9f9f9;
+        }
+        .winner {
+            background-color: #b0e0e6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Крестики-нолики</h1>
+    <div id="board"></div>
+    <button id="reset" style="margin-top: 20px;">Начать заново</button>
+
+    <script>
+        const board = document.getElementById('board');
+        const resetButton = document.getElementById('reset');
+        let currentPlayer = 'X';
+        const gameState = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+
+        function createBoard() {
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.setAttribute('data-cell-index', i);
+                cell.addEventListener('click', handleCellClick);
+                board.appendChild(cell);
+            }
+        }
+
+        function handleCellClick(event) {
+            const cell = event.target;
+            const cellIndex = cell.getAttribute('data-cell-index');
+
+            if (gameState[cellIndex] !== '' || !gameActive) {
+                return;
+            }
+
+            gameState[cellIndex] = currentPlayer;
+            cell.innerText = currentPlayer;
+
+            if (checkWinner()) {
+                gameActive = false;
+                return;
+            }
+
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        }
+
+        function checkWinner() {
+            const winningConditions = [
+                [0, 1, 2],
+                [3, 4, 5],
+                [6, 7, 8],
+                [0, 3, 6],
+                [1, 4, 7],
+                [2, 5, 8],
+                [0, 4, 8],
+                [2, 4, 6]
+            ];
+
+            for (let condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                    declareWinner(gameState[a]);
+                    return true;
+                }
+            }
+
+            if (!gameState.includes('')) {
+                declareWinner(null); // Ничья
+            }
+
+            return false;
+        }
+
+        function declareWinner(winner) {
+            const cells = document.querySelectorAll('.cell');
+            if (winner) {
+                alert(`Игрок ${winner} выиграл!`);
+                cells.forEach(cell => {
+                    if (cell.innerText === winner) {
+                        cell.classList.add('winner');
+                    }
+                });
+            } else {
+                alert('Ничья!');
+            }
+        }
+
+        function resetGame() {
+            gameState.fill('');
+            currentPlayer = 'X';
+            gameActive = true;
+            const cells = document.querySelectorAll('.cell');
+            cells.forEach(cell => {
+                cell.innerText = '';
+                cell.classList.remove('winner');
+            });
+        }
+
+        resetButton.addEventListener('click', resetGame);
+        createBoard();
+    </script>
+</body>
+</html>
